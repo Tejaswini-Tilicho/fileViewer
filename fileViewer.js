@@ -53,20 +53,15 @@ class FileViewer {
       this.directories['filesNfolders'] = [];
       try {
         const contents = fs.readdirSync(this.currentDirectory);
-       //console.log(this.currentDirectory)
-        // Iterate over the contents
+      
         contents.forEach(item => {
-            // Construct the full path of the item
             const itemPath = path.join(this.currentDirectory, item);
     
-            // Check if the item is a directory or a file
             const stats = fs.statSync(itemPath);
             if (stats.isDirectory()) {
-                //console.log('Directory:', item);
                 this.directories['folders'].push(item)
                 this.directories['filesNfolders'].push(item)
             } else if (stats.isFile()) {
-                //console.log('File:', item);
                 this.directories['files'].push(item)
                 this.directories['filesNfolders'].push(item)
             }
@@ -75,10 +70,6 @@ class FileViewer {
         console.error('Error reading directory:', error);
     }
     
-      
-  //console.log(this.directories)
-  //console.log(this.directoriesArray)
-  //console.log(this.filesNfolders)
 }
 
   cd(input) {
@@ -103,7 +94,6 @@ class FileViewer {
       else {
         console.log('Invalid directory')
       }
-      //this.check();
       
     }
   }
@@ -116,33 +106,25 @@ class FileViewer {
 
   ls (input) {
     this.check();
-    //console.log(this.currentDirectory)
-    //let files = [];
+    
     this.fileExtensions = {};
     let filesArray = [...this.directories['files']];
-    //console.log(filesArray);
     for (let i of filesArray) {
-      //console.log(i)
       let ext = i.split(".");
-      //console.log(ext)
       if(this.fileExtensions[ext[1]]) {
         this.fileExtensions[ext[1]].push(i);
       }
       else {
         this.fileExtensions[ext[1]] = [i];
       }
-      //this.fileExtensions[ext[1]] ;
       
     }
-    //console.log(this.fileExtensions)
 
   if(input[1] === undefined) {
     console.log('All Files and Directories:', this.directories['filesNfolders']);
   }
     else if (input[1] === Constants.G) {
-    //console.log("Folders:\n");
     console.log('Directories:', this.directories['folders']);
-    //console.log("Files:\n");
     console.log('Files:', this.directories['files']);
     }
     
@@ -231,8 +213,6 @@ class FileViewer {
   }
 
   find(input) {
-    //Implement code here
-    //let ls = new LS();
     
     if (input[1] === undefined) {
         console.log('Please specify name to search');
@@ -240,7 +220,6 @@ class FileViewer {
 
     else if (input[2] === undefined || input[2] === Constants.C && input[1]) {
 
-        //console.log(this.filesNfolders)
         let files = fs.readdirSync(this.currentDirectory);
         console.log(files)
         let reqFiles = files.filter(item => item.includes(input[1]));
@@ -260,7 +239,6 @@ class FileViewer {
     else if (input[2] === Constants.E && input[1]) {
       let files = fs.readdirSync(this.currentDirectory);
       let t = files.map(item =>item.split(".").shift())
-     // console.log(t)
       let reqFiles = t.filter(file => file.endsWith(input[1]));
       console.log(reqFiles);
     }
@@ -279,8 +257,6 @@ class FileViewer {
       
 }
 
-//const {Find} = require('./find.js');
-//const { LS } = require('./ls.js')
 const {Logger} = require('./logs.js')
 
 class Execution {
@@ -288,8 +264,6 @@ class Execution {
   constructor() {
     this.historyCommands = [];
     this.fileViewer = new FileViewer();
-    //this.ls = new LS();
-    //this.find = new Find();
     this.logger = new Logger();
     this.historyCom = [];
 
