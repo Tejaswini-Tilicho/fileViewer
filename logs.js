@@ -12,7 +12,6 @@ class Logger {
   startLogging(filePath) {
     try {
       this.logFilePath = filePath;
-      //console.log(this.logFilePath)
 
       if (!this.loggingEnabled && this.logFilePath && this.bool) {
         fs.writeFileSync(filePath, 'S.No      Time Stamp      Command\n', 'utf-8');
