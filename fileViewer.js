@@ -48,7 +48,9 @@ class FileViewer {
 
   check() {
 
-
+    this.directories['files'] = [];
+      this.directories['folders'] = [];
+      this.directories['filesNfolders'] = [];
       try {
         const contents = fs.readdirSync(this.currentDirectory);
        //console.log(this.currentDirectory)
@@ -74,7 +76,7 @@ class FileViewer {
     }
     
       
-  console.log(this.directories)
+  //console.log(this.directories)
   //console.log(this.directoriesArray)
   //console.log(this.filesNfolders)
 }
@@ -83,9 +85,7 @@ class FileViewer {
     
     if (input[1] === '..') {
       this.currentDirectory = path.dirname(this.currentDirectory);
-      this.directories['files'] = [];
-      this.directories['folders'] = [];
-      this.directories['filesNfolders'] = [];
+      
       console.log(this.currentDirectory);
     }
 
@@ -103,38 +103,8 @@ class FileViewer {
       else {
         console.log('Invalid directory')
       }
-      this.check();
-      /*let index = 0;
-      let xyz;
-      let t = this.tempDir.replace(/\//g, '\\');
-
-      if (exe.historyCommands.length != 1  && this.currentDirectory != t) {
-        let prevCommand = exe.historyCommands[index];
-        const directoryPath = input[1];
-        xyz = prevCommand[1] + '/' + directoryPath;
-      }
-      else {
-        xyz = input[1];
-      }
-      index++;
-
-      if (fs.existsSync(xyz)) {
-        
-        let newPath = path.join(this.currentDirectory, input[1]);
-        
-        if (fs.existsSync(newPath) && fs.statSync(newPath).isDirectory()) {
-          this.currentDirectory = newPath;
-          //newPath = this.currentDirectory;
-          console.log(this.currentDirectory);
-        } else {
-          console.log('Directory does not exist.');
-        }
-      }
-      else {
-        console.log('Invalid directory');
-      }*/
-
-
+      //this.check();
+      
     }
   }
 
@@ -146,25 +116,39 @@ class FileViewer {
 
   ls (input) {
     this.check();
-    console.log(this.currentDirectory)
-    let filesArray = this.directories['files'];
+    //console.log(this.currentDirectory)
+    //let files = [];
+    this.fileExtensions = {};
+    let filesArray = [...this.directories['files']];
+    //console.log(filesArray);
     for (let i of filesArray) {
+      //console.log(i)
       let ext = i.split(".");
-      ext[1] = this.fileExtensions
+      //console.log(ext)
+      if(this.fileExtensions[ext[1]]) {
+        this.fileExtensions[ext[1]].push(i);
+      }
+      else {
+        this.fileExtensions[ext[1]] = [i];
+      }
+      //this.fileExtensions[ext[1]] ;
+      
     }
+    //console.log(this.fileExtensions)
+
   if(input[1] === undefined) {
-    console.log('All Files and Directories:', this.filesNfolders);
+    console.log('All Files and Directories:', this.directories['filesNfolders']);
   }
     else if (input[1] === Constants.G) {
     //console.log("Folders:\n");
-    console.log('Directories:', this.directoriesArray);
+    console.log('Directories:', this.directories['folders']);
     //console.log("Files:\n");
-    console.log('Files:', this.filesArray);
+    console.log('Files:', this.directories['files']);
     }
     
     else if(input[1] === Constants.A) {
     let hiddenFiles = [];
-    for (let i of this.filesArray) {
+    for (let i of this.directories['files']) {
     if(i[0] === '.') {
     hiddenFiles.push(i);
     }
@@ -173,20 +157,15 @@ class FileViewer {
     }
     
     else if(input[1] === Constants.FI) {
-      console.log('Files:', this.filesArray);
+      console.log('Files:', this.directories['files']);
     }
     
     else if (input[1] === Constants.DIR) {
-      console.log('Directories:', this.directoriesArray);
+      console.log('Directories:', this.directories['folders']);
     }
     
     else if (input[1] === Constants.FIG) {
-        console.log('.js file extensions:')
-        console.log(js)
-        console.log('.txt file extensions:')
-        console.log(this.txt)
-        console.log('.exe file extensions:')
-        console.log(exe);
+        console.log(this.fileExtensions);
     }
     
     else {
@@ -194,37 +173,61 @@ class FileViewer {
     }
   }
 
-    cat(input) {
-      let textFile = [...this.txt];
-      console.log(textFile)
+  cat2(input) {
+    if(input[1] === undefined) {
+      console.log("Please specify file path")
+    }
+    else if(!fs.existsSync(input[1])) {
+      console.log('Invalid file path')
+    }
+    else {
+     let relativePath = input[1];
+     let absolutePath = path.resolve(relativePath);
+     let check = absolutePath.split(".");
+     if(!input[2]) {
+      input[2] = 5;
+     }
+     if(fs.existsSync(absolutePath)) {
+      let temp = check.pop();
+      if(temp != 'txt') {
+        console.log('.txt file extensions not found');
+      }
+      else {
+        let fileContent = fs.readFileSync(absolutePath,'utf8');
+        const lines = fileContent.split("\n").slice(0,Number(input[2]));
+        console.log(lines.join("\n"));
+      }
+     }
+    }
+  }
 
-      if(textFile.includes(input[1])) {
-     // for(let i of textFile) {
-  
-      try {
-        const data = fs.readFileSync(input[1], 'utf8');
-        const fileData = data.split(/\r?\n/).map(name => name.trim());
-      
-      if(input[2] === undefined) {
-      console.log(fileData.slice(0,5));
+    cat(input) {
+      if(input[1] === undefined) {
+        console.log("Please specify file")
+        }
+
+      else if(input[1].split(".")[1] === 'txt') {
+        if(fs.existsSync(input[1])) {
+          try {
+            const data = fs.readFileSync(input[1], 'utf8');
+            const fileData = data.split(/\r?\n/).map(name => name.trim());
+          
+          if(input[2] === undefined) {
+          console.log(fileData.slice(0,5));
+          }
+          else {
+          console.log(fileData.slice(0,input[2]));
+          }
+          }
+          catch (err) {
+            console.error(err);
+          }
+        }
       }
       else {
-      console.log(fileData.slice(0,input[2]));
-      }
-      }
-      catch (err) {
-        console.error(err);
-      }
-      //}
-      
-      }
-      else if(input[1] === undefined) {
-      console.log("Please specify file")
-      }
-      
-      else {
-      console.log('File invalid')
-      }
+        console.log('File invalid')
+        }
+
   }
 
   find(input) {
@@ -238,47 +241,28 @@ class FileViewer {
     else if (input[2] === undefined || input[2] === Constants.C && input[1]) {
 
         //console.log(this.filesNfolders)
-        for (let i of this.filesNfolders) { //use filter
-            let check = i.split(".")
-            if (fileArray.includes(i)) {
-                // console.log(check);
-                let split1 = check[0].split(" ");
-                if (split1[0] === input[1]) {
-                    console.log(i);
-                    // console.log(this.txt);
-                }
-            }
-            else if (i === input[1]) {
-                console.log(i);
-            }
-        }
+        let files = fs.readdirSync(this.currentDirectory);
+        console.log(files)
+        let reqFiles = files.filter(item => item.includes(input[1]));
+        console.log(reqFiles);
+      
     }
 
     else if (input[2] === Constants.S && input[1]) {
-        console.log(this.txt)
-        //let startArray = [];
-        for (let i of this.txt) {
-            if(i.startsWith(input[1])) {
-                console.log(i)
-            }
-            else {
-              console.log('No such files');
-            }
-        }
-        //console.log(startArray);
-
+      let files = fs.readdirSync(this.currentDirectory);
+      console.log(files)
+      let reqFiles = files.filter(file => file.startsWith(input[1]));
+      console.log(reqFiles);
 
     }
 
 
     else if (input[2] === Constants.E && input[1]) {
-        let endArray = [];
-        for (let i of this.txt) {
-            if(i.endsWith(input[1])) {
-                console.log(i);
-            }
-        }
-        //console.log(endArray);
+      let files = fs.readdirSync(this.currentDirectory);
+      let t = files.map(item =>item.split(".").shift())
+     // console.log(t)
+      let reqFiles = t.filter(file => file.endsWith(input[1]));
+      console.log(reqFiles);
     }
 
     else {
@@ -343,6 +327,8 @@ class Execution {
           return this.fileViewer.help();
         case 'history':
           return this.history();
+        case 'cat1' :
+          return this.fileViewer.cat2(input);
         default:
           console.log("Invalid Input")
         
